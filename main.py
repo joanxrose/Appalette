@@ -59,7 +59,7 @@ def getDominantHue(box_points, image_np):
 def forFrame(frame_number, output_array, output_count, returned_frame):
     green_apples = 0
     red_apples = 0
-    color = (0, 0, 0)
+    color = {"black": (0, 0, 0), "white": (255, 255, 255)}
 
     print("FOR FRAME " , frame_number)
     print("Output for each object : ", output_array)
@@ -94,18 +94,33 @@ def forFrame(frame_number, output_array, output_count, returned_frame):
             start_point = ((x_min + x_max) // 2, y_min)
             end_point = ((x_min + x_max) // 2, y_max)
 
-        returned_frame = drawLine(returned_frame, start_point, end_point, color)
+        returned_frame = drawLine(returned_frame, start_point, end_point, color["black"])
 
         # Add text label.
-        cv.putText(returned_frame, label, (x_min + 4, y_max - 4), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2, cv.LINE_AA)
+        text_size, _ = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 2)
+        text_w, text_h = text_size
+        cv.rectangle(returned_frame, (x_min, y_max - text_h - 8), (x_min + text_w + 8, y_max), color["black"], -1)
+        cv.putText(returned_frame, label, (x_min + 6, y_max - 6), cv.FONT_HERSHEY_SIMPLEX, 0.5, color["white"], 2, cv.LINE_AA)
 
     print(F"Red: {red_apples}\nGreen: {green_apples}")
 
     # Write number of red and green apples on frame.
-    cv.putText(returned_frame, F"Red Apples: {red_apples}", (10, 50), cv.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv.LINE_AA)
-    cv.putText(returned_frame, F"Green Apples: {green_apples}", (10, 100), cv.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv.LINE_AA)
+    text_size_red, _ = cv.getTextSize(F"Red Apples: {red_apples}", cv.FONT_HERSHEY_SIMPLEX, 1, 2)
+    text_size_green, _ = cv.getTextSize(F"Green Apples: {green_apples}", cv.FONT_HERSHEY_SIMPLEX, 1, 2)
+
+    text_w_red, text_h_red = text_size_red
+    text_w_green, text_h_green = text_size_green
+    margin = 8 
+
+    cv.rectangle(returned_frame, (10 - margin, 50 - margin), (10 + text_w_red + 2 * margin, 50 + text_h_red + 2 * margin), color["black"], -1)
+    cv.rectangle(returned_frame, (10 - margin, 100 - margin), (10 + text_w_green + 2 * margin, 100 + text_h_green + 2 * margin), color["black"], -1)
+
+    cv.putText(returned_frame, F"Red Apples: {red_apples}", (14, 50 + text_h_red), cv.FONT_HERSHEY_SIMPLEX, 1, color["white"], 2, cv.LINE_AA)
+    cv.putText(returned_frame, F"Green Apples: {green_apples}", (14, 100 + text_h_green), cv.FONT_HERSHEY_SIMPLEX, 1, color["white"], 2, cv.LINE_AA)
 
     # Save frame in a folder.
+    output_folder = 'output/frames/'
+    os.makedirs(output_folder, exist_ok=True)
     cv.imwrite(F"output/frames/output_frame_{frame_number}.jpg", returned_frame)
 
     print("------------END OF A FRAME --------------")
