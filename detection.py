@@ -14,11 +14,11 @@ def drawLine(image, start_point, end_point, color):
 
     dot_length = 8
     gap_length = 8
-    if start_point[0] == end_point[0]:  # Vertical line
+    if start_point[0] == end_point[0]:      # Vertical line
         for y in range(start_point[1], end_point[1], dot_length + gap_length):
             y_end = min(y + dot_length, end_point[1])
             draw.line([(start_point[0], y), (start_point[0], y_end)], fill=color, width=2)
-    elif start_point[1] == end_point[1]:  # Horizontal line
+    elif start_point[1] == end_point[1]:    # Horizontal line
         for x in range(start_point[0], end_point[0], dot_length + gap_length):
             x_end = min(x + dot_length, end_point[0])
             draw.line([(x, start_point[1]), (x_end, start_point[1])], fill=color, width=2)
@@ -32,11 +32,11 @@ def drawLine(image, start_point, end_point, color):
 # This function returns the dominant hue of the region of interest (ROI) in an image.
 # It accepts the boxpoints of the ROI and a NumPy array representing the image.
 def getDominantHue(box_points, image_np):
-    # Extract ROI using box points.
+    # Extract the ROI using the box points.
     x_min, y_min, x_max, y_max = box_points
     roi = image_np[y_min:y_max, x_min:x_max]
 
-    # Convert ROI to HSV color space.
+    # Convert the ROI to HSV color space.
     roi_hsv = cv.cvtColor(roi, cv.COLOR_BGR2HSV)
 
     # Calculate histogram of hue values.
@@ -45,12 +45,6 @@ def getDominantHue(box_points, image_np):
     # Find the dominant hue.
     dominant_hue_bin = np.argmax(hist_hue)
     dominant_hue = int((dominant_hue_bin + 0.5) * 2)
-
-    # Convert the NumPy array to an image for visualization (Beware!).
-    # opencv_image = cv.cvtColor(image_np, cv.COLOR_RGB2BGR)
-    # cv.imshow("Image", opencv_image)
-    # cv.waitKey(0)
-    # cv.destroyAllWindows()
 
     return dominant_hue
 
@@ -67,16 +61,15 @@ def forFrame(frame_number, output_array, output_count, returned_frame):
 
     # Get the set of boxpoints of every apple object.
     apples_box_points = [obj["box_points"] for obj in output_array if obj["name"] == "apple"]
-    # print(F"Box Points: {apples_box_points}")
 
-    # For every set of apple boxpoint, get dominant hue inside the box
+    # For every set of apple boxpoint, get dominant hue inside the box.
     for box_points in apples_box_points:
         # Call getDominantHue function.
         dominant_hue = getDominantHue(box_points, returned_frame)
         print(F"Dominant Hue: {dominant_hue}")
 
         # Identify the type of apple based on dominant hue.
-        if dominant_hue in range(30, 90): # TODO: Test hue range.
+        if dominant_hue in range(30, 90):
             green_apples += 1
             label = "Green Apple"
             line_style = "vertical"
@@ -104,7 +97,7 @@ def forFrame(frame_number, output_array, output_count, returned_frame):
 
     print(F"Red: {red_apples}\nGreen: {green_apples}")
 
-    # Write number of red and green apples on frame.
+    # Write the number of red and green apples on the frame.
     text_size_red, _ = cv.getTextSize(F"Red Apples: {red_apples}", cv.FONT_HERSHEY_SIMPLEX, 1, 2)
     text_size_green, _ = cv.getTextSize(F"Green Apples: {green_apples}", cv.FONT_HERSHEY_SIMPLEX, 1, 2)
 
@@ -118,7 +111,7 @@ def forFrame(frame_number, output_array, output_count, returned_frame):
     cv.putText(returned_frame, F"Red Apples: {red_apples}", (14, 50 + text_h_red), cv.FONT_HERSHEY_SIMPLEX, 1, color["white"], 2, cv.LINE_AA)
     cv.putText(returned_frame, F"Green Apples: {green_apples}", (14, 100 + text_h_green), cv.FONT_HERSHEY_SIMPLEX, 1, color["white"], 2, cv.LINE_AA)
 
-    # Save frame in a folder.
+    # Save the frame in output folder.
     output_folder = 'output/frames/'
     os.makedirs(output_folder, exist_ok=True)
     cv.imwrite(F"output/frames/output_frame_{frame_number}.jpg", returned_frame)
