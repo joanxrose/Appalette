@@ -27,6 +27,6 @@ Follow these steps to install and run Appalette (tentative name):
 5. Make sure you have tkinter installed. It is not distributed through pip, so you have to get it elsewhere. However, it comes pre-packaged with Python for Windows and macOS.
 6. Run Appalette.
     ```
-    python main.py
+    python gui.py
     ```
 
